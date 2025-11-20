@@ -10,41 +10,36 @@ class SeamCarver(Picture):
         Return the energy of pixel at column i and row j
 
         '''
-        if i == 0: 
-            Rx = abs(self[self._width-1, j][0] - self[i+1, j][0])
-            Gx = abs(self[self._width-1, j][1] - self[i+1, j][1])
-            Bx = abs(self[self._width-1, j][2] - self[i+1, j][2])
+        w = self._width
+        h = self._height
 
-        elif i == self._width-1: 
-            Rx = abs(self[i-1, j][0] - self[0, j][0])
-            Gx = abs(self[i-1, j][1] - self[0, j][1])
-            Bx = abs(self[i-1, j][2] - self[0, j][2])       
+        #neighbor indexes with wraparounds
 
-        else: 
-            Rx = abs(self[i-1, j][0] - self[i+1, j][0])
-            Gx = abs(self[i-1, j][1] - self[i+1, j][1])
-            Bx = abs(self[i-1, j][2] - self[i+1, j][2])
+        left = (i-1) % w
+        right = (i+1) % w
+        up = (j-1) % h
+        down = (j+1) % h
 
-        if j ==0:
-            Ry = abs(self[i, j+1][0] - self[i, self._height-1][0])
-            Gy = abs(self[i, j+1][1] - self[i, self._height-1][1])
-            By = abs(self[i, j+1][2] - self[i, self._height-1][2])            
+        #neighbor pixels 
 
-        elif j== self._height-1:
-            Ry = abs(self[i, 0][0] - self[i, j-1][0])
-            Gy = abs(self[i, 0][1] - self[i, j-1][1])
-            By = abs(self[i, 0][2] - self[i, j-1][2])
+        left_pixel = self[left, j]
+        right_pixel = self[right, j]
+        up_pixel = self[i, up]
+        down_pixel = self[i, down]
 
-        else: 
-            Ry = abs(self[i, j+1][0] - self[i, j-1][0])
-            Gy = abs(self[i, j+1][1] - self[i, j-1][1])
-            By = abs(self[i, j+1][2] - self[i, j-1][2])
+        # x-gradient
+        Rx = abs(left_pixel[0]-right_pixel[0])
+        Gx = abs(left_pixel[1]-right_pixel[1])
+        Bx = abs(left_pixel[2]-right_pixel[2])
+
+        # y-gradient
+        Ry = abs(up_pixel[0]-down_pixel[0])
+        Gy = abs(up_pixel[1]-down_pixel[1])
+        By = abs(up_pixel[2]-down_pixel[2])
 
         energy = math.sqrt(Rx**2 + Gx**2 + Bx**2 + Ry**2 + Gy**2 + By**2)
 
         return energy
-
-        raise NotImplementedError
     
 
     def find_vertical_seam(self) -> list[int]:
