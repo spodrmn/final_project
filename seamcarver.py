@@ -98,8 +98,7 @@ class SeamCarver(Picture):
                 #update 
 
                 c[(x,y)] = self.energy(x,y) + c[selected_p] #stores the energy
-                p[(x,y)] = selected_p[0]                    # stores the x coordinate only, since y can be determined implicitly
-
+                p[(x,y)] = selected_p[0]                    # stores the x coordinate only
                 
         #find the end of the seam
         seam_end = min(range(w), key = lambda x: c[(x,h-1)])
@@ -122,7 +121,68 @@ class SeamCarver(Picture):
         Return a sequence of indices representing the lowest-energy
         horizontal seam
         '''
-        raise NotImplementedError
+        w = self._width
+        h = self._height
+
+        # c = minimum energy
+
+        c = {}
+
+        # p = parents
+
+        p = {}
+
+        #base case
+
+        for y in range(h): 
+            c[(0,y)] = self.energy(0,y)
+            p[(0,y)] = None
+
+        #recursive cases
+
+        for x in range(1,w):
+            for y in range(h):
+
+                parents = []
+
+                #append the pixel directly to the left
+
+                parents.append((x-1,y))
+
+                #append the pixel to the left and above if it's greater than zero
+
+                if y > 0:
+                    parents.append((x-1, y-1))
+
+                #append the one to the left and below if it's less than the height-1
+
+                if y < h-1: 
+                    parents.append((x-1, y+1))
+
+                #choose pixel with minimal energy
+
+                selected_p = min(parents,key = lambda coord: c[coord])
+
+                #update 
+
+                c[(x,y)] = self.energy(x,y) + c[selected_p] #stores the energy
+                p[(x,y)] = selected_p[1]                    # stores the y coordinate only
+
+                
+        #find the end of the seam
+        seam_end = min(range(h), key = lambda y: c[(w-1,y)])
+
+        #add end to end of list
+
+        seam = [0]*w
+        seam[w-1] = seam_end
+
+        y = seam_end
+        for x in range(w -1,0, -1):
+            y = p[(x,y)]
+            seam[x-1] = y
+
+        return seam
 
     def remove_vertical_seam(self, seam: list[int]):
         '''
