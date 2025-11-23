@@ -13,6 +13,11 @@ class SeamCarver(Picture):
         w = self._width
         h = self._height
 
+        # validity check
+
+        if not (0 <= i < w) or not (0 <= j < h):
+            raise IndexError
+
         #neighbor indexes with wraparounds
 
         left = (i-1) % w
@@ -47,7 +52,70 @@ class SeamCarver(Picture):
         Return a sequence of indices representing the lowest-energy
         vertical seam
         '''
-        raise NotImplementedError
+        
+        w = self._width
+        h = self._height
+
+        # c = minimum energy
+
+        c = {}
+
+        # p = parents
+
+        p = {}
+
+        #base case
+
+        for x in range(w): 
+            c[(x,0)] = self.energy(x,0)
+            p[(x,0)] = None
+
+        #recursive cases
+
+        for y in range(1,h):
+            for x in range(w):
+
+                parents = []
+
+                #append the pixel directly above
+
+                parents.append((x,y-1))
+
+                #append the pixel above and to the left if it's greater than zero
+
+                if x > 0:
+                    parents.append((x-1, y-1))
+
+                #append the one up and to the right if it's less than the width-1
+
+                if x < w-1: 
+                    parents.append((x+1, y-1))
+
+                #choose pixel with minimal energy
+
+                selected_p = min(parents,key = lambda coord: c[coord])
+
+                #update 
+
+                c[(x,y)] = self.energy(x,y) + c[selected_p] #stores the energy
+                p[(x,y)] = selected_p[0]                    # stores the x coordinate only, since y can be determined implicitly
+
+                
+        #find the end of the seam
+        seam_end = min(range(w), key = lambda x: c[(x,h-1)])
+
+        #add end to end of list
+
+        seam = [0]*h
+        seam[h-1] = seam_end
+
+        x = seam_end
+        for y in range(h -1,0, -1):
+            x = p[(x,y)]
+            seam[y-1] = x
+
+        return seam
+
 
     def find_horizontal_seam(self) -> list[int]:
         '''
